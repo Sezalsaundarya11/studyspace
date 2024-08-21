@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from Topic.models import Topic
 from room.models import Room
+from Topic.serializer import CreateTopicPostSerailizer
 
 # Create your views here.
 class ViewAllTopic(APIView):
@@ -23,17 +24,24 @@ class TopicView(APIView):
 
     def post(self,request):
         topic_data = request.data
-        topic_obj = Topic.objects.filter(
-            name__iexact = topic_data['topicName']
-        )
-        if topic_obj.exists():
-            return Response(data='topic already present' ,status=200)
-        else:
-            Topic.objects.create(
-                name = topic_data['topicName']
-            )
+        serializer = CreateTopicPostSerailizer(data=topic_data)
 
-            return Response(data = 'topic added', status=200)
+        if serializer.is_valid():
+            # print(serializer.validated_data)
+            topic_obj = Topic.objects.filter(
+                name__iexact = topic_data['topicName']
+            )
+            if topic_obj.exists():
+                return Response(data='topic already present' ,status=200)
+            else:
+                Topic.objects.create(
+                    name = topic_data['topicName']
+                )
+                return Response(data = 'topic added', status=200)
+        else:
+            return Response(serializer.errors, status=400)
+
+        
         
     def delete(self, request):
         topic_data = request.GET
