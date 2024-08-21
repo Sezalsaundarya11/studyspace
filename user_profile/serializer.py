@@ -80,21 +80,6 @@ class RegisterUserSerializer(serializers.Serializer):
             )
         return data
         
-
-    # def create(self, validated_data):
-    #     user_obj = User.objects.create_user(
-    #         username= validated_data['username'],
-    #         password= validated_data.pop('password')
-    #         )
-    #     Profiles.objects.create(
-    #         user = user_obj,
-    #         firstName= validated_data['firstname'],
-    #         lastName = validated_data['lastname'],
-    #         email = validated_data['email']
-
-    #     )
-
-    #     return user_obj
     
 class LoginUserSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required =True)
