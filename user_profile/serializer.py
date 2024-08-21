@@ -19,14 +19,19 @@ class RegisterUserSerializer(serializers.Serializer):
         if User.objects.filter(username = value).exists():
             raise serializers.ValidationError("A user with this username is already present")
         
-        # if len(value.get('username')) < 6:
+        if len(value) < 6:
+            raise serializers. ValidationError("Username must be 6 character long")
             
         return value
+    
+    
     
     def validate_email(self, value):
         if Profiles.objects.filter(email = value).exists():
             raise serializers.ValidationError("email id already present")
         return value
+    
+
     
     def validate_password(self, password):
         if len(password) < 6:
@@ -76,24 +81,24 @@ class RegisterUserSerializer(serializers.Serializer):
         return data
         
 
-    def create(self, validated_data):
-        user_obj = User.objects.create_user(
-            username= validated_data['username'],
-            password= validated_data.pop('password')
-            )
-        Profiles.objects.create(
-            user = user_obj,
-            firstName= validated_data['firstname'],
-            lastName = validated_data['lastname'],
-            email = validated_data['email']
+    # def create(self, validated_data):
+    #     user_obj = User.objects.create_user(
+    #         username= validated_data['username'],
+    #         password= validated_data.pop('password')
+    #         )
+    #     Profiles.objects.create(
+    #         user = user_obj,
+    #         firstName= validated_data['firstname'],
+    #         lastName = validated_data['lastname'],
+    #         email = validated_data['email']
 
-        )
+    #     )
 
-        return user_obj
+    #     return user_obj
     
 class LoginUserSerializer(serializers.Serializer):
-    username = serializers.Serializer(max_length=150, required =True)
-    password = serializers.Serializer(write_only = True)
+    username = serializers.CharField(max_length=150, required =True)
+    password = serializers.CharField(write_only = True)
 
 
     def validate(self, data):

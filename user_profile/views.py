@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny #, IsAuthenticated
 from django.contrib.auth import authenticate
-from user_profile.serializer import RegisterUserSerializer
+from user_profile.serializer import RegisterUserSerializer , LoginUserSerializer
 # Create your views here.
 
 def get_token(user):
@@ -24,36 +24,21 @@ class RegisterView(APIView):
         serializer = RegisterUserSerializer(data=register_data)
 
         if serializer.is_valid():
-            print(serializer.validated_data)
-            user_obj = serializer.save()
-        
+            user_obj = User.objects.create_user(
+                username= register_data['username'],
+                password=register_data['password']
+            )
+            Profiles.objects.create(
+                user = user_obj,
+                firstName= register_data['firstname'],
+                lastName = register_data['lastname'],
+                email = register_data['email']
 
-
-        # username_obj = User.objects.filter(
-        #     username = register_data['username']
-        # )
-        # if username_obj.exists():
-        #     return Response(data='user already present', status = 208)
-        # else:
-        #     user_obj = User.objects.create_user(
-        #         username= register_data['username'],
-        #         password=register_data['password']
-        #     )
-        #     Profiles.objects.create(
-        #         user = user_obj,
-        #         firstName= register_data['firstname'],
-        #         lastName = register_data['lastname'],
-        #         email = register_data['email']
-
-        #     )
-        #     # refresh =  RefreshToken.for_user(user_obj)
-        #     # access_token = str(refresh.access_token)
+            )
             token = get_token(user_obj)
 
             return Response({
             'message': 'User added',
-            # 'access': access_token,
-            # 'refresh': str(refresh)
             'token' : token
             }, status=201)
         
@@ -64,19 +49,24 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
     def post(self,request):
         login_data = request.data
+        serializer = LoginUserSerializer(data=login_data)
 
-        user = authenticate(
-            username = login_data['username'],
-            password = login_data['password']
-        )
-        if user is not None:
-            # Generate JWT token
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                'access': str(refresh.access_token),
-                'refresh': str(refresh)
-            }, status=200)
+        if serializer.is_valid():
+
+
+            user = authenticate(
+                username = login_data['username'],
+                password = login_data['password']
+            )
+            if user is not None:
+                token = get_token(user)
+                return Response({
+                    'token': token
+                }, status=200)
+            else:
+                return Response(data='Invalid credentials', status=401)
+            
         else:
-            return Response(data='Invalid credentials', status=401)
+            return Response(serializer.errors, status=400)
 
 

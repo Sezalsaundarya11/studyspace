@@ -9,7 +9,7 @@ class Room(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE ,null=True)
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=100)
-    description = models.TextField(null=True , blank=True)
+    description = models.TextField(blank=True)
     # members
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
